@@ -1,8 +1,10 @@
 #Python files
 __pycache__/
+_init__.py
 
 #Environment variabes
 .env
+enc
 
 #Virtual environment
 .venv/

@@ -1,0 +1,33 @@
+-- Exam Clearance Fees Management Migration
+-- This adds the ability for Finance to set exam clearance fees per programme
+
+USE `My_Financials`;
+
+-- Create exam_clearance_fees table
+CREATE TABLE IF NOT EXISTS `exam_clearance_fees` (
+  `exam_fee_id` int NOT NULL AUTO_INCREMENT,
+  `exam_name` varchar(50) NOT NULL,
+  `semester` enum('SEM1','SEM2') NOT NULL,
+  `academic_year` varchar(10) NOT NULL,
+  `programme_id` int NOT NULL,
+  `exam_fee_amount` decimal(12,2) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`exam_fee_id`),
+  UNIQUE KEY `exam_programme_unique` (`exam_name`, `semester`, `academic_year`, `programme_id`),
+  KEY `programme_id` (`programme_id`),
+  KEY `academic_year` (`academic_year`),
+  CONSTRAINT `exam_clearance_fees_ibfk_1` FOREIGN KEY (`programme_id`) REFERENCES `programmes` (`programme_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Note: This table stores the minimum exam clearance fee for each programme
+-- This is DIFFERENT from the regular fee_structures which tracks full yearly tuition
+-- Students need to pay this exam fee amount to be eligible for a specific exam
+
+-- Sample data for testing (optional)
+-- INSERT INTO exam_clearance_fees (exam_name, semester, academic_year, programme_id, exam_fee_amount, start_date, end_date) VALUES
+-- ('UE', 'SEM1', '2025-2026', 1, 150000.00, '2025-06-01', '2025-06-30'),
+-- ('UE', 'SEM2', '2025-2026', 1, 150000.00, '2025-12-01', '2025-12-31'),
+-- ('CAT1', 'SEM1', '2025-2026', 1, 75000.00, '2025-03-01', '2025-03-15');

@@ -5,7 +5,7 @@ import mysql.connector
 from mysql.connector import Error
 
 
-load_dotenv()
+load_dotenv('/home/admin_perfect/my_PY_PROJ/KIUT_FEE_TRACKER/.env')
 
 
 def get_connection():

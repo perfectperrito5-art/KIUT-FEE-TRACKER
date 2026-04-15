@@ -10,6 +10,8 @@ def compute_exam_clearance(exam_id):
     Computes clearance for all students for a given exam.
     Uses structured flags from student_fee_obligations.
     Optimized: fetches payments in batch, commits once.
+    
+    Now filters students by faculty if exam has specific faculties assigned.
     """
 
     summary = {
@@ -35,12 +37,30 @@ def compute_exam_clearance(exam_id):
         semester = exam["semester"]
         academic_year = exam["academic_year"]
 
-        # 2️⃣ Get active students
+        # 1b⃣ Get faculties assigned to this exam
         cursor.execute("""
-            SELECT student_id, reg_no, full_name
-            FROM students
-            WHERE status='ACTIVE'
-        """)
+            SELECT faculty_id FROM exam_faculties WHERE exam_id = %s
+        """, (exam_id,))
+        exam_faculties = cursor.fetchall()
+        
+        # 2️⃣ Get active students (filtered by faculty if exam has specific faculties)
+        if exam_faculties:
+            # Get students from the assigned faculties only
+            faculty_ids = [f['faculty_id'] for f in exam_faculties]
+            format_strings = ','.join(['%s'] * len(faculty_ids))
+            cursor.execute(f"""
+                SELECT student_id, reg_no, full_name
+                FROM students
+                WHERE status='ACTIVE' AND faculty_id IN ({format_strings})
+            """, tuple(faculty_ids))
+        else:
+            # No faculties specified - all students sit for this exam
+            cursor.execute("""
+                SELECT student_id, reg_no, full_name
+                FROM students
+                WHERE status='ACTIVE'
+            """)
+        
         students = cursor.fetchall()
         summary["total_students"] = len(students)
 
